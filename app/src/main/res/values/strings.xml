@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Fahri\'s Book Listing App</string>
+    <string name="search_button">Search</string>
+    <string name="keyword_hint">type any keyword</string>
+</resources>
