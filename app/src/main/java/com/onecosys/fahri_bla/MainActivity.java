@@ -1,5 +1,10 @@
 package com.onecosys.fahri_bla;
 
+import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -25,57 +32,72 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Book> tempBookArrayList = null;
 
+    private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView listView = (ListView) findViewById(R.id.list);
+        if(!CheckNetwork.isInternetAvailable(MainActivity.this)) {
 
-        userInput = (EditText) findViewById(R.id.user_input);
-        Button searchButton = (Button) findViewById(R.id.search_button);
-
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                //storing the text in a string called userBookSearch/ .replaceAll,
-                //added to be able to search for multiple words
-                userBookSearch = userInput.getText().toString().replaceAll(" ", "+");
-
-                //Logging the search term the user entered
-                Log.v(LOG_TAG, userBookSearch);
-                //if user doesn't enter a search term a toast will show,
-                //and then it will be logged
-                if (userBookSearch.trim().length() <= 0 || userBookSearch.length() <= 0) {
-                    Toast.makeText(getApplicationContext(), "No Search Entered", Toast.LENGTH_LONG).show();
-                    Log.e(LOG_TAG, "Error Response code: No Search Given");
-                    //if a search term is entered continue with task and log search term
-                } else {
-                    Log.v(LOG_TAG, userBookSearch);
-                    BookAsyncTask task = new BookAsyncTask();
-                    task.execute();
-                }
-            }
-        });
-
-        if (tempBookArrayList != null) {
-            BookAdapter adapter = new BookAdapter(this, tempBookArrayList);
-            listView.setAdapter(adapter);
+            Toast.makeText(MainActivity.this,"No Internet Connection",Toast.LENGTH_LONG).show();
         }
-    }
+        else {
+            // Otherwise, display error
+            // First, hide loading indicator so error message will be visible
+            progressBar = (ProgressBar) findViewById(R.id.loading_spinner);
+            progressBar.setVisibility(View.GONE);
+
+
+            ListView listView = (ListView) findViewById(R.id.list);
+
+            userInput = (EditText) findViewById(R.id.user_input);
+            Button searchButton = (Button) findViewById(R.id.search_button);
+
+            searchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    //storing the text in a string called userBookSearch/ .replaceAll,
+                    //added to be able to search for multiple words
+                    userBookSearch = userInput.getText().toString().replaceAll(" ", "+");
+
+                    //Logging the search term the user entered
+                    Log.v(LOG_TAG, userBookSearch);
+                    //if user doesn't enter a search term a toast will show,
+                    //and then it will be logged
+                    if (userBookSearch.trim().length() <= 0 || userBookSearch.length() <= 0) {
+                        Toast.makeText(getApplicationContext(), "No Search Entered", Toast.LENGTH_LONG).show();
+                        Log.e(LOG_TAG, "Error Response code: No Search Given");
+                        //if a search term is entered continue with task and log search term
+                    } else {
+                        Log.v(LOG_TAG, userBookSearch);
+                        BookAsyncTask task = new BookAsyncTask();
+                        task.execute();
+                    }
+                }
+            });
+
+            if (tempBookArrayList != null) {
+                BookAdapter adapter = new BookAdapter(this, tempBookArrayList);
+                listView.setAdapter(adapter);
+            }
+        }
+    }//end of onCreate
 
         private void updateUi(ArrayList<Book> books) {
 
             tempBookArrayList = books;
 
-            if (books != null) {
+            if (books != null && !books.isEmpty()) {
                 ListView bookListView = (ListView) findViewById(R.id.list);
 
                 BookAdapter adapter = new BookAdapter(this, books);
 
                 bookListView.setAdapter(adapter);
             } else {
+                Toast.makeText(getApplicationContext(), "No book found!", Toast.LENGTH_LONG).show();
                 Log.e(LOG_TAG, "Still suffering from random void errors and no results with a correct string");
             }
         }
