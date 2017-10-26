@@ -2,8 +2,19 @@ package com.onecosys.fahri_bla;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.EditText;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = MainActivity.class.getName();
+
+    public String userBookSearch;
+
+    private EditText userInput;
+
+    private ArrayList<Book> tempBookArrayList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
