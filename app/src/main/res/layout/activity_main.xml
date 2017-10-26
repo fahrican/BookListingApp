@@ -12,11 +12,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="30dp">
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
+            android:inputType="text"
             android:layout_gravity="center"
             android:id="@+id/user_input"
             android:hint="type keywords to search"/>
