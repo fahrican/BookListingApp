@@ -36,23 +36,18 @@ public class QueryUtils {
     * @param the website address aka the website URL as String
     * if the website address is initialized, make a URL object of it and return it
     * */
-    private static URL createURL (String websiteAddress) {
+    public static URL createURL (String searchItem1) {
 
-        URL websiteURL = null;
-
-        if (websiteAddress.length() == 0 || websiteAddress == null) {
-            return null;
-        }
-
+        String baseUrl = "https://www.googleapis.com/books/v1/volumes?q=";
+        String completeURL = baseUrl + searchItem1.replace(" ", "20%");
+        URL url = null;
         try {
-            websiteURL = new URL(websiteAddress);
+            url = new URL(completeURL);
         } catch (MalformedURLException e) {
-
-            Log.e(LOG_TAG, "Error with creating URL ", e);
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error Creating URl", e);
         }
-
-        return websiteURL;
+        Log.e(LOG_TAG, "Compelelte URL = " + completeURL);
+        return url;
     }
 
     /*
@@ -61,13 +56,13 @@ public class QueryUtils {
      * InputStreamReader contains characters than make a BufferedReader of it
      * the BufferedReader allows to read the complete file in one stream
     * */
-    private static String readFromStream(InputStream inputStream) throws IOException {
+    public static String readFromStream(InputStream inputStream) throws IOException {
 
         StringBuilder output = new StringBuilder();
 
         if (inputStream != null) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader reader = new BufferedReader(inputStreamReader);
             String line = reader.readLine();
 
@@ -88,7 +83,7 @@ public class QueryUtils {
      * for reading the data you need the InputStream object and for saving you need a String object
      * @return the HTTP Request as a JSON Response String
     * */
-    private static String makeHttpRequest(URL websiteURL) throws IOException {
+    public static String makeHttpRequest(URL websiteURL) throws IOException {
 
         String jsonResponse = "";
 
@@ -117,8 +112,10 @@ public class QueryUtils {
             }
         }
         catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error with reading URL ", ioe);
-            ioe.printStackTrace();
+            assert httpUrlConnection != null;
+            if (httpUrlConnection.getResponseCode() != 200) {
+                Log.e(LOG_TAG, "In MakeHttpRequest Method", ioe);
+            }
         }
         finally {
 
@@ -137,13 +134,13 @@ public class QueryUtils {
         return jsonResponse;
     }
 
-    private static List<Book> extractFeatureFromJson (String bookJson) {
+    public static ArrayList<Book> extractBookFromJson (String bookJson) {
 
         if (TextUtils.isEmpty(bookJson)) {
             return null;
         }
 
-        List<Book> books = new ArrayList<Book>();
+        ArrayList<Book> books = new ArrayList<Book>();
 
         try {
 
@@ -182,7 +179,7 @@ public class QueryUtils {
                 }
 
                 /*
-                 * Loop functions for the category(ies) array
+                 * Loop for the category(ies) array
                  */
                 JSONArray categories = volumeInfo.getJSONArray("categories");
                 if (categories.length() > 0) {
@@ -208,16 +205,6 @@ public class QueryUtils {
      */
     public static List<Book> fetchBookData(String requestUrl) {
 
-        /*We are forcing the background thread to pause execution and wait for 2 seconds
-         * (which is 2000 milliseconds), before proceeding to execute the rest of lines of code
-         * in this method.
-         */
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         URL url = createURL(requestUrl);
 
         // Perform HTTP request to the URL and receive a JSON response back
@@ -228,7 +215,7 @@ public class QueryUtils {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        List<Book> books = extractFeatureFromJson(jsonResponse);
+        List<Book> books = extractBookFromJson(jsonResponse);
         Log.v("MainActivity", "fetchBookData: " + LOG_TAG);
 
         return books;
